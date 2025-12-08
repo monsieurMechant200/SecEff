@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1764942369604.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1688473001",
+    "id" : "DA442A28",
+    "lastKnownWriteTime" : 1764323121,
+    "last_content_update" : 1764323121,
+    "path" : "~/sectEff/R/visualisation_tools.R",
+    "project_path" : "R/visualisation_tools.R",
+    "properties" : {
+        "cursorPosition" : "146,54",
+        "scrollLine" : "140",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

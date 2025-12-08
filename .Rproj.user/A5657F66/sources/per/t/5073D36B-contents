@@ -1,0 +1,452 @@
+# ===============
+# MODULE 3: UTILITAIRES
+# Fonctions utilitaires: conversions, normalisation, traitement de données
+# ========================================================================
+
+#' @title Conversion barn → m²
+#' @description Convertit une section efficace de barn en mètres carrés
+#' @param b Section efficace en barn
+#' @return Section efficace en m²
+#' @details 1 barn = 10⁻²⁸ m² = 10⁻²⁴ cm²
+#' @examples
+#' barn_to_m2(1)      # 1e-28 m²
+#' barn_to_m2(100)    # 1e-26 m²
+barn_to_m2 <- function(b) {
+  if (!is.numeric(b)) {
+    stop("L'entrée doit être numérique")
+  }
+  b * 1e-28
+}
+
+#' @title Conversion m² → barn
+#' @description Convertit une section efficace de mètres carrés en barn
+#' @param m Section efficace en m²
+#' @return Section efficace en barn
+#' @details 1 m² = 10²⁸ barn
+#' @examples
+#' m2_to_barn(1e-28)  # 1 barn
+#' m2_to_barn(1e-24)  # 10000 barn
+m2_to_barn <- function(m) {
+  if (!is.numeric(m)) {
+    stop("L'entrée doit être numérique")
+  }
+  m / 1e-28
+}
+
+#' @title Conversion barn → cm²
+#' @description Convertit une section efficace de barn en cm²
+#' @param b Section efficace en barn
+#' @return Section efficace en cm²
+#' @details 1 barn = 10⁻²⁴ cm²
+barn_to_cm2 <- function(b) {
+  if (!is.numeric(b)) {
+    stop("L'entrée doit être numérique")
+  }
+  b * 1e-24
+}
+
+#' @title Conversion cm² → barn
+#' @description Convertit une section efficace de cm² en barn
+#' @param cm Section efficace en cm²
+#' @return Section efficace en barn
+#' @details 1 cm² = 10²⁴ barn
+cm2_to_barn <- function(cm) {
+  if (!is.numeric(cm)) {
+    stop("L'entrée doit être numérique")
+  }
+  cm / 1e-24
+}
+
+#' @title Normalisation de spectres
+#' @description Normalise un vecteur par son maximum
+#' @param x Vecteur numérique à normaliser
+#' @param method Méthode de normalisation: "max" (défaut), "sum", "range"
+#' @return Vecteur normalisé
+#' @details
+#'   - "max": divise par le maximum (résultat dans [0, 1])
+#'   - "sum": divise par la somme (intégrale = 1)
+#'   - "range": normalise entre 0 et 1
+#' @examples
+#' x <- c(2, 4, 6, 8, 10)
+#' normaliser(x)                    # [0.2, 0.4, 0.6, 0.8, 1.0]
+#' normaliser(x, method = "sum")    # [0.067, 0.133, 0.2, 0.267, 0.333]
+#' normaliser(x, method = "range")  # [0, 0.25, 0.5, 0.75, 1.0]
+normaliser <- function(x, method = "max") {
+  if (!is.numeric(x)) {
+    stop("L'entrée doit être numérique")
+  }
+
+  if (length(x) == 0) {
+    return(x)
+  }
+
+  method <- match.arg(method, c("max", "sum", "range"))
+
+  if (method == "max") {
+    max_val <- max(x, na.rm = TRUE)
+    if (max_val == 0) {
+      warning("Maximum = 0, retour du vecteur original")
+      return(x)
+    }
+    return(x / max_val)
+
+  } else if (method == "sum") {
+    sum_val <- sum(x, na.rm = TRUE)
+    if (sum_val == 0) {
+      warning("Somme = 0, retour du vecteur original")
+      return(x)
+    }
+    return(x / sum_val)
+
+  } else if (method == "range") {
+    min_val <- min(x, na.rm = TRUE)
+    max_val <- max(x, na.rm = TRUE)
+    range_val <- max_val - min_val
+    if (range_val == 0) {
+      warning("Range = 0, tous les éléments sont identiques")
+      return(rep(0, length(x)))
+    }
+    return((x - min_val) / range_val)
+  }
+}
+
+#' @title Créer une grille d'énergies
+#' @description Génère une grille uniforme ou logarithmique d'énergies
+#' @param Emin Énergie minimale
+#' @param Emax Énergie maximale
+#' @param n Nombre de points (défaut: 100)
+#' @param log Si TRUE, grille logarithmique; si FALSE, grille linéaire
+#' @return Vecteur d'énergies
+#' @details
+#'   Grille log: utile pour couvrir plusieurs ordres de grandeur
+#'   Grille linéaire: utile pour étudier une région précise
+#' @examples
+#' # Grille log pour étudier de 0.1 eV à 10 MeV
+#' E_log <- grille_energie(0.1, 1e7, n = 200, log = TRUE)
+#'
+#' # Grille linéaire pour une résonance
+#' E_lin <- grille_energie(2.8, 3.2, n = 100, log = FALSE)
+grille_energie <- function(Emin, Emax, n = 100, log = TRUE) {
+  if (Emin <= 0 && log) {
+    stop("Emin doit être > 0 pour une grille logarithmique")
+  }
+
+  if (Emin >= Emax) {
+    stop("Emin doit être < Emax")
+  }
+
+  if (n < 2) {
+    stop("n doit être >= 2")
+  }
+
+  if (log) {
+    10^seq(log10(Emin), log10(Emax), length.out = n)
+  } else {
+    seq(Emin, Emax, length.out = n)
+  }
+}
+
+#' @title Interpolation linéaire de données
+#' @description Interpole des valeurs à partir de données expérimentales
+#' @param x_exp Vecteur d'abscisses expérimentales (doit être trié)
+#' @param y_exp Vecteur d'ordonnées expérimentales
+#' @param x_new Nouvelles abscisses où interpoler
+#' @param method Méthode d'interpolation: "linear" ou "spline"
+#' @param extrap Autoriser l'extrapolation (défaut: FALSE)
+#' @return Valeurs interpolées aux points x_new
+#' @details
+#'   - "linear": interpolation linéaire par morceaux (rapide)
+#'   - "spline": interpolation par spline cubique (lisse)
+#'   Si extrap = FALSE, les valeurs hors du domaine donnent NA
+#' @examples
+#' E_exp <- c(1, 2, 3, 4, 5)
+#' sigma_exp <- c(2, 8, 6, 4, 2)
+#' E_new <- seq(1, 5, by = 0.1)
+#' sigma_interp <- interpoler_sigma(E_exp, sigma_exp, E_new)
+interpoler_sigma <- function(x_exp, y_exp, x_new,
+                             method = "linear",
+                             extrap = FALSE) {
+
+  if (length(x_exp) != length(y_exp)) {
+    stop("x_exp et y_exp doivent avoir la même longueur")
+  }
+
+  if (length(x_exp) < 2) {
+    stop("Au moins 2 points sont nécessaires pour l'interpolation")
+  }
+
+  method <- match.arg(method, c("linear", "spline"))
+
+  if (method == "linear") {
+    # Interpolation linéaire native R
+    result <- approx(x_exp, y_exp, xout = x_new,
+                     method = "linear",
+                     rule = if(extrap) 2 else 1)$y
+
+  } else if (method == "spline") {
+    # Interpolation par spline cubique
+    result <- spline(x_exp, y_exp, xout = x_new,
+                     method = "natural")$y
+
+    # Gestion de l'extrapolation si non autorisée
+    if (!extrap) {
+      hors_domaine <- x_new < min(x_exp) | x_new > max(x_exp)
+      result[hors_domaine] <- NA
+    }
+  }
+
+  return(result)
+}
+
+#' @title Lissage de données bruitées
+#' @description Applique un filtre de lissage aux données
+#' @param x Vecteur à lisser
+#' @param window_size Taille de la fenêtre de lissage (impair)
+#' @param method Méthode: "moving_avg" ou "savitzky_golay"
+#' @return Vecteur lissé
+#' @details
+#'   - "moving_avg": moyenne mobile simple
+#'   - "savitzky_golay": filtre polynomial (préserve mieux les pics)
+lisser <- function(x, window_size = 5, method = "moving_avg") {
+  if (!is.numeric(x)) {
+    stop("L'entrée doit être numérique")
+  }
+
+  if (window_size %% 2 == 0) {
+    window_size <- window_size + 1
+    warning("window_size doit être impair, ajusté à ", window_size)
+  }
+
+  method <- match.arg(method, c("moving_avg", "savitzky_golay"))
+
+  n <- length(x)
+  if (window_size > n) {
+    stop("window_size ne peut pas être plus grand que la longueur du vecteur")
+  }
+
+  half_window <- (window_size - 1) / 2
+  x_smooth <- numeric(n)
+
+  if (method == "moving_avg") {
+    # Moyenne mobile
+    for (i in 1:n) {
+      idx_start <- max(1, i - half_window)
+      idx_end <- min(n, i + half_window)
+      x_smooth[i] <- mean(x[idx_start:idx_end], na.rm = TRUE)
+    }
+
+  } else if (method == "savitzky_golay") {
+    # Filtre Savitzky-Golay simplifié (ordre 2)
+    # Coefficients pour fenêtre de 5: [-3, 12, 17, 12, -3] / 35
+    if (window_size == 5) {
+      coeff <- c(-3, 12, 17, 12, -3) / 35
+    } else {
+      # Fallback: moyenne mobile
+      warning("Savitzky-Golay non implémenté pour window_size != 5, utilisation de moving_avg")
+      return(lisser(x, window_size, method = "moving_avg"))
+    }
+
+    for (i in 1:n) {
+      idx_start <- max(1, i - half_window)
+      idx_end <- min(n, i + half_window)
+      idx_range <- idx_start:idx_end
+
+      if (length(idx_range) == window_size) {
+        x_smooth[i] <- sum(x[idx_range] * coeff)
+      } else {
+        x_smooth[i] <- mean(x[idx_range], na.rm = TRUE)
+      }
+    }
+  }
+
+  return(x_smooth)
+}
+
+#' @title Dérivée numérique
+#' @description Calcule la dérivée d'une fonction échantillonnée
+#' @param x Vecteur d'abscisses
+#' @param y Vecteur d'ordonnées
+#' @param method Méthode: "forward", "backward", "central"
+#' @return Vecteur de dérivées dy/dx
+#' @details
+#'   - "forward": (y[i+1] - y[i]) / (x[i+1] - x[i])
+#'   - "backward": (y[i] - y[i-1]) / (x[i] - x[i-1])
+#'   - "central": (y[i+1] - y[i-1]) / (x[i+1] - x[i-1]) (plus précis)
+derivee <- function(x, y, method = "central") {
+  if (length(x) != length(y)) {
+    stop("x et y doivent avoir la même longueur")
+  }
+
+  n <- length(x)
+  if (n < 2) {
+    stop("Au moins 2 points sont nécessaires")
+  }
+
+  method <- match.arg(method, c("forward", "backward", "central"))
+  dy_dx <- numeric(n)
+
+  if (method == "forward") {
+    for (i in 1:(n-1)) {
+      dy_dx[i] <- (y[i+1] - y[i]) / (x[i+1] - x[i])
+    }
+    dy_dx[n] <- dy_dx[n-1]  # Extrapolation du dernier point
+
+  } else if (method == "backward") {
+    dy_dx[1] <- (y[2] - y[1]) / (x[2] - x[1])  # Forward pour le premier
+    for (i in 2:n) {
+      dy_dx[i] <- (y[i] - y[i-1]) / (x[i] - x[i-1])
+    }
+
+  } else if (method == "central") {
+    dy_dx[1] <- (y[2] - y[1]) / (x[2] - x[1])  # Forward pour le premier
+    for (i in 2:(n-1)) {
+      dy_dx[i] <- (y[i+1] - y[i-1]) / (x[i+1] - x[i-1])
+    }
+    dy_dx[n] <- (y[n] - y[n-1]) / (x[n] - x[n-1])  # Backward pour le dernier
+  }
+
+  return(dy_dx)
+}
+
+#' @title Recherche de pics
+#' @description Détecte les maxima locaux dans un signal
+#' @param x Vecteur de valeurs
+#' @param threshold Seuil relatif (0-1) pour détecter les pics
+#' @param min_distance Distance minimale entre deux pics
+#' @return Indices des pics détectés
+#' @examples
+#' E <- seq(0, 10, length.out = 500)
+#' sigma <- sigma_breit_wigner(E, 3, 0.2, 10) +
+#'          sigma_breit_wigner(E, 6, 0.3, 8)
+#' pics <- trouver_pics(sigma, threshold = 0.3)
+trouver_pics <- function(x, threshold = 0.1, min_distance = 1) {
+  if (!is.numeric(x)) {
+    stop("L'entrée doit être numérique")
+  }
+
+  n <- length(x)
+  if (n < 3) {
+    return(integer(0))
+  }
+
+  # Normaliser pour le seuil
+  x_norm <- (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+
+  pics <- c()
+
+  for (i in 2:(n-1)) {
+    # Vérifier si c'est un maximum local
+    if (x[i] > x[i-1] && x[i] > x[i+1]) {
+      # Vérifier le seuil
+      if (x_norm[i] > threshold) {
+        # Vérifier la distance minimale avec les pics déjà détectés
+        if (length(pics) == 0 || min(abs(i - pics)) >= min_distance) {
+          pics <- c(pics, i)
+        }
+      }
+    }
+  }
+
+  return(pics)
+}
+
+#' @title Statistiques descriptives d'un spectre
+#' @description Calcule les statistiques d'une section efficace
+#' @param E Vecteur d'énergies
+#' @param sigma Vecteur de sections efficaces
+#' @return Liste avec: mean, median, max, max_E, integral, FWHM
+statistiques_spectre <- function(E, sigma) {
+  if (length(E) != length(sigma)) {
+    stop("E et sigma doivent avoir la même longueur")
+  }
+
+  # Statistiques de base
+  idx_max <- which.max(sigma)
+
+  # Intégrale (aire sous la courbe)
+  if (length(E) >= 2) {
+    integrale <- sum(diff(E) * (sigma[-1] + sigma[-length(sigma)]) / 2)
+  } else {
+    integrale <- NA
+  }
+
+  # FWHM (Full Width at Half Maximum) - approximatif
+  half_max <- max(sigma) / 2
+  idx_above <- which(sigma > half_max)
+  if (length(idx_above) >= 2) {
+    FWHM <- E[max(idx_above)] - E[min(idx_above)]
+  } else {
+    FWHM <- NA
+  }
+
+  list(
+    mean = mean(sigma, na.rm = TRUE),
+    median = median(sigma, na.rm = TRUE),
+    max = max(sigma, na.rm = TRUE),
+    max_E = E[idx_max],
+    integral = integrale,
+    FWHM = FWHM,
+    n_points = length(E)
+  )
+}
+
+# ============================================================================
+# TESTS DE VALIDATION
+# ============================================================================
+
+if (FALSE) {  # Mettre TRUE pour exécuter les tests
+
+  cat("=== Tests de validation du module UTILS ===\n\n")
+
+  # Test 1: Conversions d'unités
+  cat("Test 1: Conversions d'unités\n")
+  b <- 100
+  m2 <- barn_to_m2(b)
+  b_retour <- m2_to_barn(m2)
+  cat("100 barn → m² →", b_retour, "barn (erreur:", abs(b - b_retour), ")\n\n")
+
+  # Test 2: Normalisation
+  cat("Test 2: Normalisation\n")
+  x <- c(2, 4, 6, 8, 10)
+  cat("Original:", x, "\n")
+  cat("Normalisé (max):", normaliser(x, "max"), "\n")
+  cat("Normalisé (sum):", normaliser(x, "sum"), "\n")
+  cat("Normalisé (range):", normaliser(x, "range"), "\n\n")
+
+  # Test 3: Grille d'énergie
+  cat("Test 3: Grille d'énergie\n")
+  E_log <- grille_energie(1, 1000, n = 5, log = TRUE)
+  E_lin <- grille_energie(1, 5, n = 5, log = FALSE)
+  cat("Log:", E_log, "\n")
+  cat("Lin:", E_lin, "\n\n")
+
+  # Test 4: Interpolation
+  cat("Test 4: Interpolation\n")
+  x_exp <- c(1, 2, 3, 4, 5)
+  y_exp <- c(1, 4, 9, 16, 25)  # x²
+  x_new <- c(1.5, 2.5, 3.5)
+  y_interp <- interpoler_sigma(x_exp, y_exp, x_new, method = "linear")
+  y_attendu <- x_new^2
+  cat("Interpolé:", y_interp, "\n")
+  cat("Attendu:", y_attendu, "\n")
+  cat("Erreur max:", max(abs(y_interp - y_attendu)), "\n\n")
+
+  # Test 5: Lissage
+  cat("Test 5: Lissage\n")
+  set.seed(123)
+  x_bruité <- sin(seq(0, 2*pi, length.out = 50)) + rnorm(50, 0, 0.2)
+  x_lisse <- lisser(x_bruité, window_size = 5)
+  cat("Bruit avant:", sd(x_bruité - sin(seq(0, 2*pi, length.out = 50))), "\n")
+  cat("Bruit après:", sd(x_lisse - sin(seq(0, 2*pi, length.out = 50))), "\n\n")
+
+  # Test 6: Dérivée
+  cat("Test 6: Dérivée numérique\n")
+  x <- seq(0, 2*pi, length.out = 100)
+  y <- sin(x)
+  dy_dx <- derivee(x, y, method = "central")
+  dy_dx_attendu <- cos(x)
+  erreur <- mean(abs(dy_dx - dy_dx_attendu))
+  cat("Erreur moyenne sur cos(x):", erreur, "\n\n")
+
+  cat("Tous les tests terminés \n")
+}

@@ -1,0 +1,235 @@
+# SectEff - Cross-Section Analysis
+
+## Overview
+
+SectEff is a complete R library dedicated to the analysis and visualization of cross sections in nuclear physics, particle physics, and their innovative applications in digital marketing. The package provides a set of mathematical, statistical, and visualization tools to model physical interactions and behavioral processes.
+
+## Why SectEff?
+
+The concept of cross section is fundamental in physics to quantify the probability of interaction between particles. SectEff extends this rigorous approach to new domains such as marketing analytics, while still offering a full set of tools for physics research.
+
+## Main Features
+
+### Physics Module (MATH_TOOLS)
+
+* Differential and total cross section calculations
+* Rutherford scattering model
+* Breit-Wigner resonances (single and multiple)
+* Statistical error propagation
+* Exponential attenuation law
+* Atomic density to cross-section conversions
+
+### Marketing Module (MARKETING_TOOLS)
+
+* Advertising campaign efficiency calculation
+* Advertising fatigue modeling
+* Conversion analysis inspired by cross-section concepts
+* Media exposure optimization
+
+### Utilities Module (UTILS)
+
+* Unit conversions (barn to m2 and reverse)
+* Spectrum normalization
+* Logarithmic energy grids
+* Interpolation of experimental data
+
+### Visualization Module (VIZ_TOOLS)
+
+* Cross-section plots (linear and logarithmic scales)
+* Angular distributions (polar and Cartesian)
+* 2D energy-angle heatmaps
+* Multi-curve comparison
+* Full dashboards with residuals
+* Frame-by-frame animation export
+
+## Local Installation
+
+```
+install.packages("path/to/SectEff", repos = NULL, type = "source")
+```
+
+## Quick Start
+
+### Example 1: Rutherford Scattering
+
+```r
+library(SectEff)
+
+theta <- seq(10, 170, by = 1)
+Z1 <- 2
+Z2 <- 79
+E  <- 5
+
+sigma <- sigma_rutherford(theta, Z1, Z2, E)
+
+plot_angular_distribution(
+  theta,
+  sigma,
+  type = "polar",
+  main = "Alpha Scattering on Gold"
+)
+```
+
+### Example 2: Breit-Wigner Resonance
+
+```r
+E <- grille_energie(0.1, 10, n = 500, log = TRUE)
+
+params <- data.frame(
+  E0 = c(1.5, 3.0, 5.5),
+  Gamma = c(0.2, 0.3, 0.4),
+  sigma0 = c(5, 8, 3)
+)
+
+sigma <- sigma_multiresonance(E, params)
+
+plot_resonance(E, sigma, title = "Multiple Resonances")
+```
+
+### Example 3: Marketing Application
+
+```r
+impressions <- 1e6
+conversions <- 5000
+density <- 0.7
+
+eff <- sigma_marketing(conversions, impressions, density)
+cat("Marketing efficiency: ", eff, "\n")
+
+exposures <- seq(1, 20, by = 1)
+sigma0 <- eff
+mu <- 0.15
+
+efficiency <- sigma_fatigue(sigma0, mu, exposures)
+
+plot_sigma(
+  exposures,
+  efficiency,
+  xlab = "Number of Exposures",
+  ylab = "Relative Efficiency",
+  main = "Advertising Fatigue Curve"
+)
+```
+
+### Example 4: Full Dashboard
+
+```r
+E_theo <- grille_energie(0.5, 8, n = 200, log = FALSE)
+sigma_theo <- sigma_breit_wigner(E_theo, E0 = 3, Gamma = 0.5, sigma0 = 10)
+
+E_exp <- seq(1, 7, by = 0.5)
+sigma_exp <- sigma_breit_wigner(E_exp, 3, 0.5, 10) + rnorm(length(E_exp), 0, 0.5)
+
+plot_dashboard(E_theo, sigma_theo, sigma_exp, E_exp)
+```
+
+## Module Documentation
+
+### MATH_TOOLS Functions
+
+* sigma_diff(): Differential cross section
+* sigma_total(): Numerical integration (total cross section)
+* sigma_rutherford(): Rutherford scattering
+* sigma_breit_wigner(): Simple resonance
+* sigma_multiresonance(): Multiple resonances
+* sigma_capture(): Capture cross section
+* loi_attenuation(): Exponential attenuation
+* erreur_sigma(): Error propagation
+
+### MARKETING_TOOLS Functions
+
+* sigma_marketing(): Campaign efficiency
+* sigma_fatigue(): Fatigue model
+
+### VIZ_TOOLS Functions
+
+* plot_sigma(): Generic cross-section plot
+* plot_resonance(): Resonance curves
+* plot_compare_sigma(): Multi-curve comparison
+* plot_angular_distribution(): Angular distributions
+* plot_heatmap_sigma(): 2D heatmap
+* plot_dashboard(): Complete dashboard
+
+## Theoretical Concepts
+
+### Microscopic Cross Section
+
+The cross section sigma quantifies the probability of interaction:
+
+```
+sigma = N_reactions / (N_projectiles * n_targets * thickness)
+```
+
+Unit: barn (1 barn = 1e-28 m2)
+
+### Rutherford Formula
+
+For Coulomb scattering:
+
+```
+d_sigma / d_Omega = (Z1 * Z2 * e2 / 4E)^2 * 1 / sin(theta / 2)^4
+```
+
+### Breit-Wigner Formula
+
+Resonance modeling:
+
+```
+sigma(E) = sigma0 * (Gamma^2 / 4) / ((E - E0)^2 + (Gamma^2 / 4))
+```
+
+## Typical Workflows
+
+### Workflow 1: Full Experimental Analysis
+
+```r
+E_exp <- read.csv("data/energy.csv")$E
+counts <- read.csv("data/counts.csv")$counts
+
+sigma_exp <- sigma_exp(counts, N0 = 1e10, n = 1e22, t = 3600)
+
+E_theo <- grille_energie(min(E_exp), max(E_exp), n = 500)
+sigma_theo <- sigma_breit_wigner(E_theo, E0 = 2.5, Gamma = 0.3, sigma0 = 12)
+
+plot_dashboard(E_theo, sigma_theo, sigma_exp, E_exp)
+```
+
+### Workflow 2: Marketing Optimization
+
+```r
+densities <- seq(0.3, 0.9, by = 0.1)
+
+efficiencies <- sapply(densities, function(d) {
+  sigma_marketing(5000, 1e6, d)
+})
+
+plot(
+  densities,
+  efficiencies,
+  type = "b",
+  pch = 19,
+  xlab = "Targeting Density",
+  ylab = "Efficiency",
+  main = "Targeting Optimization"
+)
+```
+
+## Citation
+
+If you use SectEff in your research, please cite:
+
+```
+@software{secteff2025,
+  author = {Aat Ndongo David Meilleur and Ngneumeu Yvan},
+  title = {SectEff: Cross Section Analysis with R},
+  year = {2025}
+}
+```
+
+## Contact
+
+Email: [meilleurd2001@email.com](mailto:meilleurd2001@email.com)
+
+Developed with care for the R scientific community.
+
+

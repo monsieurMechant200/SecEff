@@ -1,0 +1,5 @@
+# 1. MATH_TOOLS
+cat("--- MODULE MATH_TOOLS ---\n")
+dN <- 1000; N0 <- 1e6; n <- 1e23; dx <- 0.01
+sigma <- sigma_diff(dN, N0, n, dx)
+cat("Section efficace différentielle:", sigma, "barn\n")

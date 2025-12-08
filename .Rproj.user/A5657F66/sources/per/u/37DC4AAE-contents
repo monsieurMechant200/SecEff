@@ -1,0 +1,4 @@
+help(SectEff)
+??SectEff
+help(package="SectEff")
+?sigma_fatigue
