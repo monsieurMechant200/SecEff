@@ -45,7 +45,7 @@ The concept of cross section is fundamental in physics to quantify the probabili
 ## Local Installation
 
 ```
-install.packages("path/to/SectEff", repos = NULL, type = "source")
+remotes::install_github("monsieurMechant200/Cross-Section-R-Package")
 ```
 
 ## Quick Start
@@ -53,7 +53,7 @@ install.packages("path/to/SectEff", repos = NULL, type = "source")
 ### Example 1: Rutherford Scattering
 
 ```r
-library(SectEff)
+library(CrossSectionRPackage)
 
 theta <- seq(10, 170, by = 1)
 Z1 <- 2
