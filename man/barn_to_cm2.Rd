@@ -13,7 +13,7 @@ barn_to_cm2(b)
 Cross section in cm2
 }
 \description{
-Converts cross section from barn to cm²
+Converts cross section from barn to cm2
 }
 \details{
 1 barn = 10e-24 cm2

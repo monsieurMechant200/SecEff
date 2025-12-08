@@ -34,7 +34,7 @@ m2_to_barn <- function(m) {
 }
 
 #' @title Conversion barn → cm2
-#' @description Converts cross section from barn to cm²
+#' @description Converts cross section from barn to cm2
 #' @param b Cross section in barn
 #' @return Cross section in cm2
 #' @details 1 barn = 10e-24 cm2

@@ -1,4 +1,4 @@
-Package: SectEff
+Package: CrossSectionRPackage
 Type: Package
 Title: Analyse and visualization of cross Sections in physics and Marketing
 Version: 1.2.0

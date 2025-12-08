@@ -1,4 +1,4 @@
-# SectEff - Cross-Section Analysis
+# Cross Section R Package - Cross-Section Analysis
 
 ## Overview
 
