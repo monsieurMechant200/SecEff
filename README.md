@@ -127,10 +127,7 @@ plot_sigma(
 
 **Section efficace microscopique**
 
-\[
-\sigma = \frac{N_{\text{reactions}}}
-{N_{\text{projectiles}} \cdot n_{\text{targets}} \cdot t}
-\]
+\[\sigma = \frac{N_{\text{reactions}}}{N_{\text{projectiles}} \cdot n_{\text{targets}} \cdot t}\]
 
 
 Unité : barn
@@ -138,25 +135,12 @@ Unité : barn
 
 **Diffusion de Rutherford**
 
-\[
-\frac{d\sigma}{d\Omega}
-=
-\left(
-\frac{Z_1 Z_2 e^2}{4E}
-\right)^2
-\frac{1}{\sin^4\left(\frac{\theta}{2}\right)}
-\]
+\[\frac{d\sigma}{d\Omega}=\left(\frac{Z_1 Z_2 e^2}{4E}\right)^2\frac{1}{\sin^4\left(\frac{\theta}{2}\right)}\]
 
 
 **Formule de Breit–Wigner**
 
-\[
-\sigma(E)
-=
-\sigma_0
-\frac{\Gamma^2 / 4}
-{(E - E_0)^2 + \Gamma^2 / 4}
-\]
+\[\sigma(E)=\sigma_0\frac{\Gamma^2 / 4}{(E - E_0)^2 + \Gamma^2 / 4}\]
 
 
 ---
