@@ -1,3 +1,4 @@
+
 # SecEff – Cross Section Analysis in R
 
 **SecEff** est une bibliothèque R dédiée à l’analyse, la modélisation et la visualisation des sections efficaces (*cross sections*) en physique nucléaire et des particules, avec une extension conceptuelle innovante vers l’analyse de performance en marketing et sciences comportementales.
